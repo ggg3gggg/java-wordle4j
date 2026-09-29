@@ -14,6 +14,7 @@ public class WordleGame {
     private List<String> pastResults = new ArrayList<>();
     private List<String> hints = new ArrayList<>();
     private PrintWriter writer;
+    private Random random = new Random();
 
     public WordleGame(WordleDictionary dictionary, PrintWriter writer) {
         if (dictionary == null || dictionary.size() == 0) {
@@ -23,7 +24,6 @@ public class WordleGame {
         this.dictionary = dictionary;
         this.writer = writer;
 
-        Random random = new Random();
         int index = random.nextInt(dictionary.size());
 
         while (dictionary.getWord(index).length() != 5) {
@@ -34,6 +34,10 @@ public class WordleGame {
     }
 
     public WordleGame(WordleDictionary dictionary, String answer, PrintWriter writer) {
+        if (dictionary == null || dictionary.size() == 0) {
+            throw new RuntimeException("Словарь пуст");
+        }
+
         this.dictionary = dictionary;
         this.answer = answer;
         this.writer = writer;
@@ -44,16 +48,14 @@ public class WordleGame {
             throw new RuntimeException("Загаданное слово отсутствует");
         }
 
-        if (dictionary == null) {
-            throw new RuntimeException("Словарь отсутствует");
-        }
-
         if (writer == null) {
             throw new RuntimeException("Логгер отсутствует");
         }
 
         if (!dictionary.containsWord(word)) {
-            throw new WordNotFoundInDictionary();
+            throw new WordNotFoundInDictionary(
+                    "Такого слова нет в словаре: " + word
+            );
         }
 
         pastWords.add(word);

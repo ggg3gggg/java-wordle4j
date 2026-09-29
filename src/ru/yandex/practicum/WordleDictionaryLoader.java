@@ -24,11 +24,8 @@ public class WordleDictionaryLoader {
             String word;
 
             while ((word = reader.readLine()) != null) {
-                word = word.toLowerCase();
-                word = word.replace("ё", "е");
-
+                word = word.toLowerCase().replace("ё", "е");
                 words.add(word);
-
             }
         }
 

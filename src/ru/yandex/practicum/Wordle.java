@@ -10,71 +10,62 @@ public class Wordle {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        try {
-            try (PrintWriter writer = new PrintWriter(new FileWriter("wordle.log"))) {
-                WordleDictionaryLoader wordleDictionaryLoader = new WordleDictionaryLoader(writer);
+        try (PrintWriter writer = new PrintWriter(new FileWriter("wordle.log"))) {
+            WordleDictionaryLoader wordleDictionaryLoader = new WordleDictionaryLoader(writer);
 
-                WordleDictionary dictionary;
+            WordleDictionary dictionary = wordleDictionaryLoader.loadWords(args[0]);
 
+            WordleGame game = new WordleGame(dictionary, writer);
+
+            writer.println("Игра началась!");
+
+            boolean answer = false;
+
+            while (game.getSteps() < 6) {
                 try {
-                    dictionary = wordleDictionaryLoader.loadWords(args[0]);
-                } catch (IOException e) {
-                    writer.println("Ошибка загрузки словаря: " + e.getMessage());
-                    System.out.println("Не удалось загрузить словарь.");
-                    return;
-                }
+                    String attempts = scanner.nextLine().toLowerCase().replace("ё", "е");
 
-                WordleGame game = new WordleGame(dictionary, writer);
-
-                writer.println("Игра началась!");
-
-                boolean answer = false;
-
-                while (game.getSteps() < 6) {
-                    try {
-                        String attempts = scanner.nextLine();
-                        attempts = attempts.toLowerCase();
-                        attempts = attempts.replace("ё", "е");
-
-                        if (attempts.isEmpty()) {
-                            String hint = game.hintWord();
-                            writer.println("Подсказка: " + hint);
-                            System.out.println(hint);
-                            continue;
-                        }
-
-                        if (attempts.length() != 5) {
-                            System.out.println("Неправильное количество символов.");
-                            continue;
-                        }
-
-                        answer = game.checkAnswer(attempts);
-
-                        writer.println("Попытка: " + attempts);
-
-                        String result = game.checkLetters(attempts);
-
-                        writer.println("Результат: " + result);
-                        System.out.println(result);
-
-                        if (answer) {
-                            System.out.println("Вы угадали слово!");
-                            break;
-                        }
-
-                    } catch (WordNotFoundInDictionary e) {
-                        writer.println("Ошибка: Такого слова нету в словаре.");
-                        System.out.println("Такого слова в словаре нет.");
+                    if (attempts.isEmpty()) {
+                        String hint = game.hintWord();
+                        writer.println("Подсказка: " + hint);
+                        System.out.println(hint);
+                        continue;
                     }
-                }
-                writer.println("Загаданное слово: " + game.getAnswer());
-                if (!answer) {
-                    writer.println("Попытки закончились");
-                    System.out.println("Попытки закончились.");
+
+                    if (attempts.length() != 5) {
+                        System.out.println("Неправильное количество символов.");
+                        continue;
+                    }
+
+                    answer = game.checkAnswer(attempts);
+
+                    writer.println("Попытка: " + attempts);
+
+                    String result = game.checkLetters(attempts);
+
+                    writer.println("Результат: " + result);
+                    System.out.println(result);
+
+                    if (answer) {
+                        System.out.println("Вы угадали слово!");
+                        break;
+                    }
+
+                } catch (WordNotFoundInDictionary e) {
+                    writer.println("Ошибка: " + e.getMessage());
+                    System.out.println(e.getMessage());
                 }
             }
+
+            writer.println("Загаданное слово: " + game.getAnswer());
+
+            if (!answer) {
+                writer.println("Попытки закончились");
+                System.out.println("Попытки закончились.");
+            }
+
         } catch (Exception e) {
-            System.out.println("Произошла ошибка " + e.getMessage());
+            System.out.println("Произошла ошибка: " + e.getMessage());
         }
     }
 }
